@@ -1,0 +1,36 @@
+#This method is valid when the bootloader of windows is corrupted and recovery mode can't be accessible 
+We Will rebuild the UEFI partition for Windows 10/11
+Warning : This steps must be done correctly to preserve the os
+          Try to create a backup data before starting 
+          
+Step1 :Access to Windows recovery tools in the recovey mode 
+      (if recovery mode is not accessibe access to recovey tools through Windows media installer )
+Step2 :Open CMD and tap bcdedit to check bcd files
+Step3 :Access to UEFI partition
+      1)Tab diskpart
+      2)Tab list disk to display disks 
+      3)Tab sel disk 0 (in this case Windows is installed in disk 0)
+      4)Tab list vol and search a FAT32 partition with about 100MB of size 
+      4)Tab sel vol 1 (in this case the FAT32 partition is volume 1)
+      5)Tab assign letter=v (Assign a letter to the selected partition)
+      6)Tab exit and tab v: 
+Step4 :Check UEFI partition 
+      1)Tab v: (Access to partition) and tab dir to list all directories 
+        a EFI directory must be found 
+      2)tab cd efi and tab dir (a boot file must be found)
+Step5 :Rebuild UEFI partition 
+      1)tab c: (if windows is installed in another volume like d: type it)
+      2)tab format v: /fs:fat32 
+      3)tab bcdboot c:\windows /s v: /f UEFI
+Step6 : Re-check UEFI partition 
+      1)tab v: and type cd efi
+        Microsoft directory must be found with the new UEFI
+Step7 :Reboot 
+#This method creates a generic bcd file to boot to the system but the recovery mode is no longuer accessible 
+#You can upgrade the bcd file but it will create a second recovery partition and leave the first partition unused
+Step8 :Create a bcd backup file (Optional)
+      1)Open CMD in Windows 
+      2)Tab bcdedit /export c:\bcd.bk
+Step9 :Restore from bcd backup file (OPtional)
+      1)Tab bcdedit /import c:\bcd.bk
+
