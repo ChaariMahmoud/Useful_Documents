@@ -1,0 +1,57 @@
+##This is an installation guide for Arch-linux distribution
+##You must follow these steps correctly to get a proper installation
+
+##Section 1: Pre-installation 
+Step 1 : Download the arch-linux iso file from https://archlinux.org/download/
+Step 2 : Prepare an installation medium (You can use Balena-etcher or ventoy)
+Step 3 : Disable Secure Boot (Arch Linux installation images do not support Secure Boot)
+Step 4 : Boot the live environment 
+Step 5 : Set the console keyboard layout (The default console keymap is US)
+         You can change it to Azerty : localectl set-keymap fr
+##Section 2: Configure wireless connexion
+#You can skip this section if you are connected to wired connecxion 
+Step 6 : Identify the wireless interface name with : ip addr show (In my case wlan0)
+Step 7 : Show Wifi SSID :
+         1) iwctl 
+         2) station wlan0 get-networks 
+         3) exit 
+Step 8 : Connect to your wifi : iwctl --passphrase "your Wifi passphrase" staton wlan0 connect Your_wifi_SSID
+##Section 3: Partition the disk
+#The entire disk will be used in this section 
+Step 9 : Identify the device identifier for the hard we want to use :lsblk (in my case we will use sda)
+Step 10: Set up partitions 
+         1) fdisk /dev/sda
+         2) p (Display current partition layout)
+         3) g (Create a new partition table !!This will wape the hard drive!!)
+         #Create first partition
+         1) n (Create the first partition) 
+         2) Leave the partition number as default (1) by pressing enter 
+         3) Leave the first sector as default by pressing enter 
+         4) For the last sector type +1G and press enter 
+         #Create the second partition 
+         1) n (Create the second partition) 
+         2) Leave the partition number as default (1) by pressing enter
+         3) Leave the first sector as default by pressing enter 
+         4) For the last sector type +1G and press enter
+         #Create the root partition 
+         1) n (Create the root partition)
+         2) Leave the partition number as default (1) by pressing enter
+         3) Leave the first sector as default by pressing enter
+         4) Leave the last sector as default by pressing enter
+         #Write changes to disk 
+         1) p (Verify the creation of 3 partitions)
+         2) w (Write changes to disk)
+##Section 4: Format the partitions
+Step 11 :Format the first partition to FAT32 filesystem : mkfs.fat -F32 /dev/sda1
+Step 12 :Format the second partition to ext4 filesyste : mkfs.ext4 /dev/sda2
+Step 13 :Format the root partition to ext4 filesystem : mkfs.ext4 /dev/sda3
+#Section 5: Mount the second and root partitions 
+Step 14 :Mount the root partition : mount /dev/sda3 /mnt
+Step 15 :Create a new directory to mount the boot partition (partition 2) : mkdir /mnt/boot 
+Step 16 :Mount the second partition : mount /dev/sda2 /mnt/boot
+#Section 6: Install required packages for Arch-Linux
+Step 17 :Install required packages : pacstrap -i /mnt base
+        (If you have problem with signatures : pacman -Sy archlinux-keyring)
+#Section 7: Generate the fstab file 
+Step 18 : Generate the fstab file : genfstab -U -p /mnt >> /mnt/etc/fstab
+
