@@ -1,5 +1,5 @@
 ##This is an installation guide for Arch-linux distribution
-##You must follow these steps correctly to get a seccussful installation
+##You should follow these steps correctly to get a seccussful installation
 
 ##Section 1: Pre-installation 
 Step 1 : Download the arch-linux iso file from https://archlinux.org/download/
@@ -16,7 +16,7 @@ Step 7 : Show Wifi SSID :
          1) iwctl 
          2) station wlan0 get-networks 
          3) exit 
-Step 8 : Connect to your wifi : iwctl --passphrase "your Wifi passphrase" staton wlan0 connect Your_wifi_SSID
+Step 8 : Connect to your wifi : iwctl --passphrase "your Wifi passphrase" station wlan0 connect Your_wifi_SSID
 
 ##Section 3: Partition the disk
 #The entire disk will be used in this section 
