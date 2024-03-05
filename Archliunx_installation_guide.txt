@@ -1,5 +1,5 @@
 ##This is an installation guide for Arch-linux distribution
-##You must follow these steps correctly to get a proper installation
+##You must follow these steps correctly to get a seccussful installation
 
 ##Section 1: Pre-installation 
 Step 1 : Download the arch-linux iso file from https://archlinux.org/download/
@@ -8,6 +8,7 @@ Step 3 : Disable Secure Boot (Arch Linux installation images do not support Secu
 Step 4 : Boot the live environment 
 Step 5 : Set the console keyboard layout (The default console keymap is US)
          You can change it to Azerty : localectl set-keymap fr
+         
 ##Section 2: Configure wireless connexion
 #You can skip this section if you are connected to wired connecxion 
 Step 6 : Identify the wireless interface name with : ip addr show (In my case wlan0)
@@ -16,6 +17,7 @@ Step 7 : Show Wifi SSID :
          2) station wlan0 get-networks 
          3) exit 
 Step 8 : Connect to your wifi : iwctl --passphrase "your Wifi passphrase" staton wlan0 connect Your_wifi_SSID
+
 ##Section 3: Partition the disk
 #The entire disk will be used in this section 
 Step 9 : Identify the device identifier for the hard we want to use :lsblk (in my case we will use sda)
@@ -41,17 +43,62 @@ Step 10: Set up partitions
          #Write changes to disk 
          1) p (Verify the creation of 3 partitions)
          2) w (Write changes to disk)
+         
 ##Section 4: Format the partitions
-Step 11 :Format the first partition to FAT32 filesystem : mkfs.fat -F32 /dev/sda1
-Step 12 :Format the second partition to ext4 filesyste : mkfs.ext4 /dev/sda2
-Step 13 :Format the root partition to ext4 filesystem : mkfs.ext4 /dev/sda3
+Step 11 : Format the first partition to FAT32 filesystem : mkfs.fat -F32 /dev/sda1
+Step 12 : Format the second partition to ext4 filesyste : mkfs.ext4 /dev/sda2
+Step 13 : Format the root partition to ext4 filesystem : mkfs.ext4 /dev/sda3
+
 #Section 5: Mount the second and root partitions 
-Step 14 :Mount the root partition : mount /dev/sda3 /mnt
-Step 15 :Create a new directory to mount the boot partition (partition 2) : mkdir /mnt/boot 
-Step 16 :Mount the second partition : mount /dev/sda2 /mnt/boot
+Step 14 : Mount the root partition : mount /dev/sda3 /mnt
+Step 15 : Create a new directory to mount the boot partition (partition 2) : mkdir /mnt/boot 
+Step 16 : Mount the second partition : mount /dev/sda2 /mnt/boot
+
 #Section 6: Install required packages for Arch-Linux
-Step 17 :Install required packages : pacstrap -i /mnt base
-        (If you have problem with signatures : pacman -Sy archlinux-keyring)
+Step 17 : Install required packages : pacstrap -i /mnt base
+          (If you have problem with signatures : pacman -Sy archlinux-keyring)
+          
 #Section 7: Generate the fstab file 
 Step 18 : Generate the fstab file : genfstab -U -p /mnt >> /mnt/etc/fstab
 
+#Section 8: Log in to in-progress installation
+Step 19 : Access to root partition : arch-chroot /mnt
+          (Any command will be executed against the installation) 
+Step 20 : set up the root password : passwd 
+Step 21 : Create a user with sudo privileges : useradd -m -g users -G wheel your-username
+Step 22 : Set up the user password : passwd your-username
+Step 23 : Install linux-firmware : pacman -S linux-firmware
+Step 24 : Install kernels : pacman -S linux linux-headers linux-lts linux-lts-headers
+Step 25 : Install additional packages : pacman -S base-devel dosfstools grub efibootmgr mtools nano networkmanager os-prober sudo 
+Step 26 : Install desktop environment 
+          #If you want to install KDE Plasma
+          pacman -S xorg plasma plasma-wayland-session kde-applications
+          #If you want to install Gnome 
+          pacman -S gnome gnome-tweaks 
+Step 27 : Enable network manager : systemctl enable NetworkManager
+Step 28 : Install driver for video card 
+          1)Identify the video card : lspci
+          #If you have an intel or AMD GPU 
+          2)Install mesa driver : pacman -S mesa 
+          3)Enable hardware decoding for intel : pacman -S intel-media-driver 
+           (Only if your intel chipset is Broadwell or newer)
+          4)Enable hardware decoding for AMD : pacman -S libva-mesa-driver
+          #If you have Nvidia GPU 
+          5)Install nvidia proprietary driver : pacman -S nvidia nvidia-utils nvidia-lts
+Step 29 : Generate modules for installed kernels
+          1)For linux kernel : mkinitcpio -p linux
+          2)For linux-lts kernel : mkinitcpio -p linux-lts 
+Step 30 : Set the locale : nano etc/locale.gen
+          (Uncomment your locale and save the file)           
+Step 31 : Generate the locale : locale-gen
+Step 32 : Set up the EFI partition (First partition) 
+          1)Create a directory to mount the partition : mkdir /boot/EFI
+          2)Mount the first partition as EFI : mount /dev/sda1 /boot/EFI
+Step 33 : Install the GRUB bootloader : grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
+Step 34 : Copy files in boot directory : cp /usr/share/locale/fr\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/fr.mo
+Step 35 : Generate a config file for the GRUB bootloader : grub-mkconfig -o /boot/grub/grub.cfg 
+Step 36 : Enable gdm (If you already installed gnome) : systemctl enable gdm
+Step 37 : Enable sddm (If you already installed kde) : systemctl enable sddm
+Step 38 : Exit the chroot environment : exit 
+Step 39 : Unmount partitions : unmount -a
+Step 40 : Reboot to the new installation : reboot 
