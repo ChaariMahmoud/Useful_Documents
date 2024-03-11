@@ -1,0 +1,36 @@
+##This guide shows how to move your Home folder to a separate partition (or location).
+
+#Step 1:Creating a New Partition
+
+Note: you can skip this step if you already have an existing external partition with enough space that you can use.
+To create a new partition, you have to first create a bootable USB thumb drive or optical disc with Ubuntu on it
+Boot from the bootabale USB and use Gparted to create Ext4 partition
+After creating the new Home partition boot from your system
+
+#Step 2:Migrate the Home Folder
+
+1)Create a Temporary Home Folder:
+  Open your file system table file : sudo nano /etc/fstab
+  Add the following line to the end of the file: /dev/sdxx   /media/home    ext4          nodev,nosuid       0   
+  (Use tab to create spaces in the line )  
+  (Remember to replace “sdxx” with the partition label you wrote down earlier.)
+  Create a mount point : sudo mkdir /media/home
+  Reload the updated file system table : sudo mount -a
+
+2)Copy the Files from Your Current Home Folder to the New Partition :
+  sudo rsync -aXS --progress /home/. /media/home/.
+
+3)Relocate the Current Home Folder:
+  cd /
+  sudo mv /home /home_backup
+  sudo mkdir /home
+
+4)Mount the New Home Folder:
+  To complete the migration, mount the new Home folder as “/home” by revisiting the fstab file:
+  sudo nano /etc/fstab
+  Change “/media/home” to “/home”. Save and exit the file.
+  sudo mount -a
+
+#Step 3 :Remove the “Home_backup” Folder
+Once you are done with the migration, you can either use the old Home folder as a backup or remove it to release the storage space. To remove it, use the command: sudo rm -rf /home_backup
+
